@@ -12,3 +12,6 @@ filter2D: filter2D.cpp
 
 histogram: histogram.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
+
+gaussian: gaussian.cpp
+	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
