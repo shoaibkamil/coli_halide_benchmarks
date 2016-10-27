@@ -15,3 +15,6 @@ histogram: histogram.cpp
 
 gaussian: gaussian.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
+
+clean:
+	rm -f cvt_color filter2D histogram gaussian
