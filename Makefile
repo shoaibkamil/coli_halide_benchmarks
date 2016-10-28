@@ -2,7 +2,7 @@ HALIDE_PATH = ../Halide
 HALIDE_LIB = -L${HALIDE_PATH}/bin -lHalide
 HALIDE_INC = -I${HALIDE_PATH}/include
 
-all: cvt_color filter2D histogram gaussian resize
+all: cvt_color filter2D histogram gaussian resize warp_affine
 
 cvt_color: cvt_color.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
@@ -19,5 +19,8 @@ gaussian: gaussian.cpp
 resize: resize.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
 
+warp_affine: warp_affine.cpp
+	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
+
 clean:
-	rm -f cvt_color filter2D histogram resize gaussian *.html
+	rm -f cvt_color filter2D histogram resize gaussian warp_affine *.html
