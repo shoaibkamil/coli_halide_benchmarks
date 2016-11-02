@@ -22,5 +22,8 @@ resize: resize.cpp
 warp_affine: warp_affine.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
 
+rec_filter: rec_filter.cpp
+	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
+
 clean:
-	rm -f cvt_color filter2D histogram resize gaussian warp_affine *.html
+	rm -f rec_filter cvt_color filter2D histogram resize gaussian warp_affine *.html
