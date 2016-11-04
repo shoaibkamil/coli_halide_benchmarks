@@ -2,13 +2,15 @@
 
 using namespace Halide;
 
+#define kernelX_length 7
+#define kernelY_length 7
+
 int main(int argc, char* argv[]) {
   ImageParam in{Float(32), 2, "input"};
   ImageParam kernelX{Float(32), 1, "kernelx"};
   ImageParam kernelY{Float(32), 1, "kernely"};
 
-  int kernelX_length = 7;
-  int kernelY_length = 7;
+  
 
   Func gaussian{"gaussian"};
   Func gaussian_x{"gaussian_x"};
