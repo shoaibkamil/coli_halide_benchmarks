@@ -12,6 +12,8 @@ int main(int argc, char* argv[]) {
   Func filter2D_nordom{"filter2D_nordom"};
   Var x, y;
 
+  Expr e;
+
   for (int i=-RADIUS; i<RADIUS; i++) {
     for (int j=-RADIUS; j<RADIUS; j++)  {
       e += in(x+i, y+j) * kernel(RADIUS+i, RADIUS+j);
