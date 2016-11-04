@@ -1,5 +1,7 @@
 #include "Halide.h"
 
+#define NOCLAMP
+
 using namespace Halide;
 
 Expr mixf(Expr x, Expr y, Expr a) {
@@ -41,6 +43,7 @@ int main(int argc, char* argv[]) {
   Expr src_rows = in.height();
   Expr src_cols = in.width();
 
+#ifdef NOCLAMP
   coord_00_r = clamp(coord_00_r, 0, src_rows);
   coord_00_c = clamp(coord_00_c, 0, src_cols);
   coord_01_r = clamp(coord_01_r, 0, src_rows);
@@ -49,6 +52,16 @@ int main(int argc, char* argv[]) {
   coord_10_c = clamp(coord_10_c, 0, src_cols);
   coord_11_r = clamp(coord_11_r, 0, src_rows);
   coord_11_c = clamp(coord_11_c, 0, src_cols);
+#else
+  coord_00_r = coord_00_r;
+  coord_00_c = coord_00_c;
+  coord_01_r = coord_01_r;
+  coord_01_c = coord_01_c;
+  coord_10_r = coord_10_r;
+  coord_10_c = coord_10_c;
+  coord_11_r = coord_11_r;
+  coord_11_c = coord_11_c;
+#endif
 
   Expr A00 = in(coord_00_r, coord_00_c);
   Expr A10 = in(coord_10_r, coord_10_c);
