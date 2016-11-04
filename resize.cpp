@@ -1,5 +1,7 @@
 #include "Halide.h"
 
+#define NOCLAMP
+
 using namespace Halide;
 
 Expr mixf(Expr x, Expr y, Expr a) {
@@ -32,17 +34,33 @@ int main(int argc, char* argv[]) {
   Expr r = o_r - floor(o_r);
   Expr c = o_c - floor(o_c);
 
+#ifdef NOCLAMP
+  Expr coord_00_r = cast<int>(floor(o_r));
+  Expr coord_00_c = cast<int>(floor(o_c));
+#else
   Expr coord_00_r = clamp( cast<int>(floor(o_r)), 0, o_h - 1 );
   Expr coord_00_c = clamp( cast<int>(floor(o_c)), 0, o_w - 1 );
+#endif
 
   Expr coord_01_r = coord_00_r;
-  Expr coord_01_c = clamp( coord_00_c + 1, 0, o_w - 1 );
 
+#ifdef NOCLAMP
+  Expr coord_01_c = coord_00_c + 1;
+  Expr coord_10_r = coord_00_r + 1;
+#else
+  Expr coord_01_c = clamp( coord_00_c + 1, 0, o_w - 1 );
   Expr coord_10_r = clamp( coord_00_r + 1, 0, o_h - 1 );
+#endif
+
   Expr coord_10_c = coord_00_c;
 
+#ifdef NOCLAMP
+  Expr coord_11_r = coord_00_r + 1;
+  Expr coord_11_c = coord_00_c + 1;
+#else
   Expr coord_11_r = clamp( coord_00_r + 1, 0, o_h - 1 );
   Expr coord_11_c = clamp( coord_00_c + 1, 0, o_w - 1 );
+#endif
 
   Expr A00 = in(coord_00_r, coord_00_c);
   Expr A10 = in(coord_10_r, coord_10_c);
