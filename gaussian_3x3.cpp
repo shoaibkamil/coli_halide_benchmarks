@@ -22,13 +22,13 @@ int main(int argc, char* argv[]) {
   Expr e,f;
   e = 0.0f;
   for (int i=0; i<kernelX_length; i++) {
-    e += in(x+i-kernelX_length/2, y) * kernelX(i);
+    e += in(x+i,y) * kernelX(i);
   }
   gaussian_x(x, y) = e;
 
   f = 0.0f;
   for (int i=0; i<kernelX_length; i++) {
-    f += gaussian_x(x, y+i-kernelX_length/2) * kernelY(i);
+    f += gaussian_x(x, y+i) * kernelY(i);
   }
 
   gaussian(x, y) = f;
