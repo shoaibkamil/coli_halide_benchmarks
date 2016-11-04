@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
   Func filter2D_nordom{"filter2D_nordom"};
   Var x, y;
 
-  Expr e;
+  Expr e = 0.0f;
 
   for (int i=-RADIUS; i<RADIUS; i++) {
     for (int j=-RADIUS; j<RADIUS; j++)  {
