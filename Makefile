@@ -2,7 +2,7 @@ HALIDE_PATH = ../Halide
 HALIDE_LIB = -L${HALIDE_PATH}/bin -lHalide
 HALIDE_INC = -I${HALIDE_PATH}/include
 
-all: cvt_color filter2D histogram gaussian gaussian_3x3 filter2D_nordom resize warp_affine heat2d divergence2d
+all: cvt_color heat3d filter2D histogram gaussian gaussian_3x3 filter2D_nordom resize warp_affine heat2d divergence2d
 
 cvt_color: cvt_color.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
@@ -34,8 +34,11 @@ rec_filter: rec_filter.cpp
 heat2d: heat2d.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
 
+heat3d: heat3d.cpp
+	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
+
 divergence2d: divergence2d.cpp
 	c++ -std=c++11 ${HALIDE_INC} -o $@ $< ${HALIDE_LIB}
 
 clean:
-	rm -f gaussian_3x3 rec_filter cvt_color filter2D_nordom filter2D histogram resize gaussian warp_affine heat2d divergence2d *.html
+	rm -f heat3d gaussian_3x3 rec_filter cvt_color filter2D_nordom filter2D histogram resize gaussian warp_affine heat2d divergence2d *.html
