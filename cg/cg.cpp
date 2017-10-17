@@ -88,13 +88,13 @@ void generate_test_data(float** mat, float** b) {
   float *b_ret = (float*)malloc(sizeof(float) * 3);
 
   mat_ret[0] = 5;
-  mat_ret[1] = 1;
-  mat_ret[2] = 0.5;
-  mat_ret[3] = 0.4;
+  mat_ret[3] = 1;
+  mat_ret[6] = 0.5;
+  mat_ret[1] = 0.4;
   mat_ret[4] = 5;
-  mat_ret[5] = 0.3;
-  mat_ret[6] = 0.6;
-  mat_ret[7] = 0.8;
+  mat_ret[7] = 0.3;
+  mat_ret[2] = 0.6;
+  mat_ret[5] = 0.8;
   mat_ret[8] = 5;
 
   b_ret[0] = 1.f;
@@ -131,8 +131,7 @@ void cg_1(halide_buffer_t* A, halide_buffer_t* b, float tol, int maxiters,
 
   // calculate residual
   sgemv(1.0f, A, x, 0.0f, tmp, tmp);
-  print_vec("tmp", tmp, 3);
-  svecsub(tmp, b, r);
+  svecsub(b, tmp, r);
 
   // calculate norm squared
   sdot(r, r, &normr2_buf);
@@ -144,31 +143,30 @@ void cg_1(halide_buffer_t* A, halide_buffer_t* b, float tol, int maxiters,
   while (normr2 > tol && iter < maxiters) {
     // calculate denom
     sgemv(1.0f, A, p, 0.0f, tmp, tmp);
+
     sdot(r, tmp, &denom_buf);
 
     alpha = normr2 / denom;
 
     // update x
-    // TODO: make sure the order here is correct
     saxpy(alpha, p, x, x);
 
     // update normr2
     normr2old = normr2;
     saxpy(-alpha, tmp, r, r);
+
     sdot(r, r, &normr2_buf);
 
     // update p
     beta = normr2 / normr2old;
-    saxpy(beta, r, p, p);
+    saxpy(beta, p, r, p);
     iter++;
   }
 }
 
+int test_small() {
 
-
-int main(int argc, char* argv[]) {
-
-  float tol = 1e-4;
+  float tol = 1e-5;
   int maxiters = 100;
 
   // generate test data
@@ -201,7 +199,26 @@ int main(int argc, char* argv[]) {
        &x_buf,
        &p_buf, &r_buf, &tmp_buf);
 
-  print_vec("x", x, 3);
+  // check answer
+  float normr2;
+  halide_buffer_t normr2_buf;
+  wrap_vector(&normr2_buf, &normr2, 1);
+  sgemv(1.0f, &mat_buf, &x_buf, 0.0f, &tmp_buf, &tmp_buf);
+  svecsub(&tmp_buf, &b_buf, &r_buf);
+  sdot(&r_buf, &r_buf, &normr2_buf);
+  print_vec("answer", &tmp_buf, 3);
+  print_vec("expected", &b_buf, 3);
 
+  if (normr2 >= tol) {
+    printf("|r|^2 = %f\n", normr2);
+    printf("FAILED\n");
+    return -1;
+  }
+
+  printf("SUCCESS\n");
   return 0;
+}
+
+int main(int argc, char* argv[]) {
+  return test_small();
 }
