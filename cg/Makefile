@@ -49,4 +49,4 @@ runtime.a: vecutil_generators
 	./vecutil_generators -o . -r runtime target=host-no_asserts-no_bounds_query
 
 clean:
-	rm -f blas_l1_generators blas_l2_generators vecutil_generators ${OBJS} *.stmt cg ${HEADERS}
+	rm -rf blas_l1_generators blas_l2_generators vecutil_generators ${OBJS} *.stmt cg ${HEADERS} *dSYM
