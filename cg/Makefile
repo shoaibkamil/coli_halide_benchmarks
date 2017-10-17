@@ -7,7 +7,7 @@ OBJS = saxpy.o sdot.o sgemv.o sveccopy.o svecsub.o runtime.a
 HEADERS = saxpy.h sdot.h sgemv.h sveccopy.h svecsub.h
 
 cg: objs
-	c++ -fno-rtti -std=c++11 cg.cpp ${OBJS} -I ${HALIDE_INCLUDE_DIR} -o cg \
+	c++ -g -fno-rtti -std=c++11 cg.cpp ${OBJS} -I ${HALIDE_INCLUDE_DIR} -o cg \
 		-L ${HALIDE_LIBRARY_DIR} -lHalide -lcurses -lz
 
 
