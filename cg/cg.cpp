@@ -21,6 +21,7 @@
   end
 **/
 #include <cstdio>
+#include <cstdlib>
 #include "Halide.h"
 
 #include "saxpy.h"
@@ -46,7 +47,7 @@ inline void wrap_vector(halide_buffer_t* ret, float* data, int size) {
   ret->dim[0].extent = size;
   ret->dim[0].stride = 1;
 
-  ret->set_device_dirty();
+  ret->set_host_dirty();
 }
 
 // wrap a matrix in a halide_buffer_t
@@ -69,7 +70,7 @@ inline void wrap_matrix(halide_buffer_t* ret, float* data, int size) {
   ret->dim[1].stride = size;
 
 
-  ret->set_device_dirty();
+  ret->set_host_dirty();
 }
 
 void print_vec(std::string name, float* vec, int size) {
@@ -106,6 +107,26 @@ void generate_test_data(float** mat, float** b) {
 
   // expected result: {0.074, 0.362, 0.533}
 } 
+
+void generate_random_test_data(float** mat, float** b, int size) {
+  float *mat_ret = (float*)malloc(sizeof(float) * size * size);
+  float *b_ret = (float*)malloc(sizeof(float) * size);
+
+  srand(size * (uint64_t)mat_ret);
+
+  for (int i=0; i<size; i++)
+    b_ret[i] = 10 * i + 10*(float)rand()/RAND_MAX;
+
+  for (int i=0; i<size; i++)
+    for (int j=0; j<size; j++)
+      mat_ret[i+size*j] = (float)rand()/RAND_MAX;
+
+  for (int i=0; i<size; i++)
+    mat_ret[i+size*i] = size*10;
+
+  *mat = mat_ret;
+  *b = b_ret;
+}
 
 // CG
 // Inputs: Matrix A, RHS vector b, tolerance, maxiters
@@ -219,6 +240,68 @@ int test_small() {
   return 0;
 }
 
+int test_rand(int size) {
+
+  float tol = 1e-5;
+  int maxiters = 100;
+
+  // generate test data
+  float* mat;
+  float* b;
+  halide_buffer_t mat_buf;
+  halide_buffer_t b_buf;
+
+  generate_random_test_data(&mat, &b, size);
+  wrap_vector(&b_buf, b, size);
+  wrap_matrix(&mat_buf, mat, size);
+
+  // create x and temporaries
+  float x[size];
+  float p[size];
+  float r[size];
+  float tmp[size];
+  for (int i=0; i<size; i++)
+    x[i] = p[i] = r[i] = tmp[i] = 0.0f;
+
+  halide_buffer_t x_buf;
+  halide_buffer_t p_buf;
+  halide_buffer_t r_buf;
+  halide_buffer_t tmp_buf;
+
+  wrap_vector(&x_buf, x, size);
+  wrap_vector(&p_buf, p, size);
+  wrap_vector(&r_buf, r, size);
+  wrap_vector(&tmp_buf, tmp, size);
+
+  // call CG
+  cg_1(&mat_buf, &b_buf, tol, maxiters,
+       &x_buf,
+       &p_buf, &r_buf, &tmp_buf);
+
+  // check answer
+  float normr2;
+  halide_buffer_t normr2_buf;
+  wrap_vector(&normr2_buf, &normr2, 1);
+  sgemv(1.0f, &mat_buf, &x_buf, 0.0f, &tmp_buf, &tmp_buf);
+  svecsub(&tmp_buf, &b_buf, &r_buf);
+  sdot(&r_buf, &r_buf, &normr2_buf);
+  print_vec("answer", &tmp_buf, size);
+  print_vec("expected", &b_buf, size);
+
+  if (normr2 >= tol) {
+    printf("|r|^2 = %f\n", normr2);
+    printf("FAILED\n");
+    return -1;
+  }
+
+  printf("SUCCESS\n");
+  return 0;
+}
+
 int main(int argc, char* argv[]) {
-  return test_small();
+  if (argc < 2) {
+    printf("Usage: %s <size>\n", argv[0]);
+    return 1;
+  }
+  return test_rand(atoi(argv[1]));
 }
