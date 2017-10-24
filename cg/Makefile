@@ -1,12 +1,12 @@
 
-HALIDE_ROOT=/Users/kamil/documents/work/adobe/halide
+HALIDE_ROOT=/Users/skamil/documents/work/adobe/halide
 HALIDE_INCLUDE_DIR=${HALIDE_ROOT}/include
 HALIDE_LIBRARY_DIR=${HALIDE_ROOT}/lib
 
 OBJS = saxpy.o sdot.o sgemv.o sveccopy.o svecsub.o runtime.a
 HEADERS = saxpy.h sdot.h sgemv.h sveccopy.h svecsub.h
 
-cg: objs
+cg: objs common.h cg.cpp
 	c++ -g -fno-rtti -std=c++11 cg.cpp ${OBJS} -I ${HALIDE_INCLUDE_DIR} -o cg \
 		-L ${HALIDE_LIBRARY_DIR} -lHalide -lcurses -lz
 
