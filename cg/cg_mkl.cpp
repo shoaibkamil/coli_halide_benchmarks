@@ -22,6 +22,8 @@
 **/
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
+#include <iostream>
 
 #include "common.h"
 #include "mkl.h"
@@ -132,8 +134,8 @@ int test_small() {
 
 int test_rand(int size) {
 
-  float tol = 1e-5;
-  int maxiters = 100;
+  float tol = 1e-4;
+  int maxiters = 5000;
 
   // generate test data
   float* mat;
@@ -149,10 +151,14 @@ int test_rand(int size) {
   for (int i=0; i<size; i++)
     x[i] = p[i] = r[i] = tmp[i] = 0.0f;
 
+  auto start = std::chrono::high_resolution_clock::now();
   // call CG
   cg_mkl(size, mat, b, tol, maxiters,
        x,
        p, r, tmp);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  std::cout << "Elapsed: " << elapsed_seconds.count() << std::endl;
 
   // check answer
   float normr2;
@@ -162,8 +168,8 @@ int test_rand(int size) {
   cblas_saxpy(size, -1.0f, tmp, 1, r, 1);
   normr2 = cblas_sdot(size, r, 1, r, 1);
 
-  print_vec("answer", tmp, size);
-  print_vec("expected", b, size);
+//  print_vec("answer", tmp, size);
+//  print_vec("expected", b, size);
 
   if (normr2 >= tol) {
     printf("|r|^2 = %f\n", normr2);
@@ -176,9 +182,11 @@ int test_rand(int size) {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    printf("Usage: %s <size>\n", argv[0]);
+  if (argc < 3) {
+    printf("Usage: %s <size> <iters>\n", argv[0]);
     return 1;
   }
-  return test_rand(atoi(argv[1]));
+  for (int i=0; i<atoi(argv[2]); i++) {
+    test_rand(atoi(argv[1]));
+  }
 }

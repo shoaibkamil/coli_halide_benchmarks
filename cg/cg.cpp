@@ -22,6 +22,9 @@
 **/
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
+#include <iostream>
+
 #include "HalideRuntime.h"
 
 #include "common.h"
@@ -146,8 +149,8 @@ int test_small() {
 
 int test_rand(int size) {
 
-  float tol = 1e-5;
-  int maxiters = 100;
+  float tol = 1e-4;
+  int maxiters = 5000;
 
   // generate test data
   float* mat;
@@ -178,9 +181,13 @@ int test_rand(int size) {
   wrap_vector(&tmp_buf, tmp, size);
 
   // call CG
+  auto start = std::chrono::high_resolution_clock::now();
   cg_1(&mat_buf, &b_buf, tol, maxiters,
        &x_buf,
        &p_buf, &r_buf, &tmp_buf);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  std::cout << "Elapsed: " << elapsed_seconds.count() << std::endl;
 
   // check answer
   float normr2;
@@ -189,8 +196,8 @@ int test_rand(int size) {
   sgemv(1.0f, &mat_buf, &x_buf, 0.0f, &tmp_buf, &tmp_buf);
   svecsub(&tmp_buf, &b_buf, &r_buf);
   sdot(&r_buf, &r_buf, &normr2_buf);
-  print_vec("answer", &tmp_buf, size);
-  print_vec("expected", &b_buf, size);
+//  print_vec("answer", &tmp_buf, size);
+//  print_vec("expected", &b_buf, size);
 
   if (normr2 >= tol) {
     printf("|r|^2 = %f\n", normr2);
@@ -203,9 +210,11 @@ int test_rand(int size) {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    printf("Usage: %s <size>\n", argv[0]);
+  if (argc < 3) {
+    printf("Usage: %s <size> <iters>\n", argv[0]);
     return 1;
   }
-  return test_rand(atoi(argv[1]));
+  for (int i=0; i<atoi(argv[2]); i++) {
+    test_rand(atoi(argv[1]));
+  }
 }
