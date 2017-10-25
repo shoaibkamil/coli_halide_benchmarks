@@ -3,6 +3,9 @@ HALIDE_ROOT=/Users/skamil/documents/work/adobe/halide
 HALIDE_INCLUDE_DIR=${HALIDE_ROOT}/include
 HALIDE_LIBRARY_DIR=${HALIDE_ROOT}/lib
 
+MKL_COMPILE_OPTS=-DMKL_ILP64 -m64 -I${MKLROOT}/include -I${HALIDE_INCLUDE_DIR}
+MKL_LINK_OPTS=-L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+
 OBJS = saxpy.o sdot.o sgemv.o sveccopy.o svecsub.o runtime.a
 HEADERS = saxpy.h sdot.h sgemv.h sveccopy.h svecsub.h
 
@@ -10,6 +13,8 @@ cg: objs common.h cg.cpp
 	c++ -g -fno-rtti -std=c++11 cg.cpp ${OBJS} -I ${HALIDE_INCLUDE_DIR} -o cg \
 		-L ${HALIDE_LIBRARY_DIR} -lHalide -lcurses -lz
 
+cg_mkl: cg_mkl.cpp common.h
+	c++ -g -std=c++11 cg_mkl.cpp ${MKL_COMPILE_OPTS} -o cg_mkl ${MKL_LINK_OPTS}
 
 objs: ${OBJS}
 
