@@ -43,51 +43,41 @@ void cg_mkl(int rows, float* A, float* b, float tol, int maxiters,
 
 
   // calculate residual
-  //sgemv(1.0f, A, x, 0.0f, tmp, tmp);
   cblas_sgemv(CblasColMajor, CblasNoTrans, rows, rows,
     1.0f, A, rows, x, 1, 0.0f, tmp, 1);
 
-  //svecsub(b, tmp, r);
   // first copy b into r
   // then compute r = -tmp + r
   cblas_scopy(rows, b, 1, r, 1);
   cblas_saxpy(rows, -1.0f, tmp, 1, r, 1);
 
   // calculate norm squared
-  //sdot(r, r, &normr2_buf);
   normr2 = cblas_sdot(rows, r, 1, r, 1);
 
   // copy r to p
-  //sveccopy(r, p);
   cblas_scopy(rows, r, 1, p, 1);
 
   // main loop
   while (normr2 > tol && iter < maxiters) {
     // calculate denom
-    //sgemv(1.0f, A, p, 0.0f, tmp, tmp);
     cblas_sgemv(CblasColMajor, CblasNoTrans, rows, rows,
       1.0f, A, rows, p, 1, 0.0f, tmp, 1);
 
-    //sdot(r, tmp, &denom_buf);
     denom = cblas_sdot(rows, r, 1, tmp, 1);
 
     alpha = normr2 / denom;
 
     // update x
-    //saxpy(alpha, p, x, x);
     cblas_saxpy(rows, alpha, p, 1, x, 1);
 
     // update normr2
     normr2old = normr2;
-    //saxpy(-alpha, tmp, r, r);
     cblas_saxpy(rows, -alpha, tmp, 1, r, 1);
 
-    //sdot(r, r, &normr2_buf);
     normr2 = cblas_sdot(rows, r, 1, r, 1);
 
     // update p
     beta = normr2 / normr2old;
-    //saxpy(beta, p, r, p);
     cblas_sscal(rows, beta, p, 1);
     cblas_saxpy(rows, 1.0f, r, 1, p, 1);
 
@@ -118,15 +108,13 @@ int test_small() {
        p, r, tmp);
 
   print_vec("x", x, 3);
+
   // check answer
   float normr2;
-//  sgemv(1.0f, &mat_buf, &x_buf, 0.0f, &tmp_buf, &tmp_buf);
   cblas_sgemv(CblasColMajor, CblasNoTrans, 3, 3,
     1.0f, mat, 3, x, 1, 0.0f, tmp, 1);
-//  svecsub(&tmp_buf, &b_buf, &r_buf);
   cblas_scopy(3, b, 1, r, 1);
   cblas_saxpy(3, -1.0f, tmp, 1, r, 1);
-//  sdot(&r_buf, &r_buf, &normr2_buf);
   normr2 = cblas_sdot(3, r, 1, r, 1);
 
   print_vec("answer", tmp, 3);
